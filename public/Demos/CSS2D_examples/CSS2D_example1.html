@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>CSS2D Example</title>
+	<link rel="icon" href="../../images/ico.png" type="image/png">
+	<style>
+	info {
+		position: absolute;
+		top: 10px;
+		width: 100%;
+		text-align: center;
+		z-index: 100;
+		display:flex;
+	}
+
+	.label {
+		color: white;
+		font-size: 16px;
+		background-color: rgba(0, 0, 0, 0.7); /* Add a background for visibility */
+		padding: 4px;
+		border-radius: 4px;
+	}
+	</style>
+	<!--<script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script>-->
+    <!--<script src="https://cdn.jsdelivr.net/npm/three/examples/js/renderers/CSS2DRenderer.js"></script>-->
+	<!--<script src="../three/build/three.module.js"></script>-->
+	<!--<script src="../three/examples/jsm/renderers/CSS2DRenderer.js"></script>-->
+	<script type="importmap">
+		{
+			"imports": {
+				"three": "../../three/build/three.module.js",
+				"three/addons/": "./jsm/"
+			}
+		}
+	</script>
+	<!--<script type="module" src="js1.js"></script>-->
+	<script type="module">
+		import * as THREE from 'three';
+		import { CSS2DRenderer, CSS2DObject } from '../../three/examples/jsm/renderers/CSS2DRenderer.js';
+
+		const scene = new THREE.Scene();
+				const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+				const renderer = new THREE.WebGLRenderer(); renderer.setSize( window.innerWidth, window.innerHeight );
+
+				let labelRenderer = new CSS2DRenderer();
+				labelRenderer.setSize( window.innerWidth, window.innerHeight );
+				labelRenderer.domElement.style.position = 'absolute';
+				labelRenderer.domElement.style.top = '0px';
+				document.body.appendChild( labelRenderer.domElement );
+
+				renderer.setAnimationLoop( animate );
+				document.body.appendChild( renderer.domElement );
+
+				const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+				const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+				const cube = new THREE.Mesh( geometry, material ); scene.add( cube );
+				//new THREE.TextGeometry( "Serbia Strong!", parameters );
+
+				camera.position.z = 5;
+
+				function animate() {
+					cube.rotation.x += 0.01;
+					cube.rotation.y += 0.01;
+					renderer.render( scene, camera );
+					labelRenderer.render( scene, camera );
+				}
+
+
+				const cubeDiv = document.createElement( 'div' );
+				cubeDiv.className = 'label';
+				cubeDiv.textContent = 'Floating Label';
+				cubeDiv.style.backgroundColor = 'transparent';
+
+				const cubeLabel = new CSS2DObject( cubeDiv );
+				cubeLabel.position.set( 1.5, 1, 1 );
+				cubeLabel.center.set( 1, 1 );
+				cube.add( cubeLabel );
+				cubeLabel.layers.set( 0 );
+
+        cube.layers.set( 0 );
+	</script>
+</head>
+<body>
+</body>
+</html>

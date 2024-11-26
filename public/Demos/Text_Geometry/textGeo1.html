@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>CSS2D Example</title>
+	<link rel="icon" href="../../images/ico.png" type="image/png">
+	<style>
+	info {
+		position: absolute;
+		top: 10px;
+		width: 100%;
+		text-align: center;
+		z-index: 100;
+		display:flex;
+	}
+
+	.label {
+		color: white;
+		font-size: 16px;
+		background-color: rgba(0, 0, 0, 0.7); /* Add a background for visibility */
+		padding: 4px;
+		border-radius: 4px;
+	}
+	</style>
+</head>
+<body>
+	<script type="importmap">
+		{
+			"imports": {
+				"three": "../../three/build/three.module.js",
+				"three/addons/": "./jsm/"
+			}
+		}
+
+	</script>
+	<script type="module">
+		import * as THREE from 'three';
+
+		// Fontloader is required sadly...
+		import { TextGeometry } from '../../three/examples/jsm/geometries/TextGeometry.js';
+		import { FontLoader } from '../../three/examples/jsm/loaders/FontLoader.js';
+
+
+		const scene = new THREE.Scene();
+		const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		const renderer = new THREE.WebGLRenderer(); renderer.setSize( window.innerWidth, window.innerHeight );
+
+
+		renderer.setAnimationLoop( animate );
+		document.body.appendChild( renderer.domElement );
+
+		const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+		const materials = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+		//const cube = new THREE.Mesh( geometry, materials ); scene.add( cube );
+		let group = new THREE.Group();
+
+
+		//const text;
+		// Load the font asynchronously
+		const fontLoader = new FontLoader();
+		fontLoader.load('fonts/droid_sans_regular.typeface.json', (font) => {
+		// Create TextGeometry with the loaded font
+		const text = new TextGeometry( "Hello!", {
+			font: font,
+			size: 5,
+			depth: 1,
+			curveSegments: 4,
+			bevelThickness: 0,
+			bevelSize: 0.1,
+			bevelEnabled: true
+		} );
+
+		let textMesh1 = new THREE.Mesh( text, materials );
+		textMesh1.position.set(0, 0, 0);
+		textMesh1.rotation.set(0, 0, 0);
+
+		// Calculate Bounding Box
+		text.computeBoundingBox();
+		const boundingBox = text.boundingBox;
+		const center = new THREE.Vector3();
+		boundingBox.getCenter(center); // Get center of the geometry
+
+		// Recenter the Geometry
+		text.translate(-center.x, -center.y, -center.z);
+
+		group.add( textMesh1 );
+		});
+
+		scene.add(group);
+
+		//text.computeBoundingBox();
+
+
+		camera.position.z = 30;
+
+		function animate() {
+		//group.rotation.x += 0.01;
+		group.rotation.y += 0.01;
+		renderer.render( scene, camera );
+		}
+	</script>
+</body>
+</html>

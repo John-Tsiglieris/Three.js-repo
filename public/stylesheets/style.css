@@ -1,0 +1,60 @@
+body {
+  display: flex;
+  padding-top: 10px;
+  padding-left: 50px;
+  padding-right: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  justify-content: center;
+}
+
+a {
+  color: #0D0D0D;
+  font-size: 20px;
+  text-decoration: none;
+}
+
+a:hover {
+   color: #F0E68C;
+}
+
+img {
+  width: 100px;
+  height: 100px;
+}
+
+
+h1 {
+  text-align: center;
+  font-size: 50px;
+}
+
+#c1 {
+  display: flex;
+  width: 75%;
+  flex-direction: column;
+  background-color: #6B8E23;
+}
+
+.c2 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.linkcontainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.linkcontainer  a{
+  margin: 10px;
+}
+
+.canvascontainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  margin: 10px;
+}

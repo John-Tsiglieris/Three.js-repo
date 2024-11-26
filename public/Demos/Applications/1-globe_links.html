@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Globe Links</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<!--<link type="text/css" rel="stylesheet" href="main.css">-->
+        <link rel="icon" href="../../images/ico.png" type="image/png">
+        <style>
+            .label {
+                background-color: rgba(0, 0, 0, 0.7); /* Add a background for visibility */
+                padding: 4px;
+                border-radius: 4px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container"></div>
+        <script type="importmap">
+			{
+				"imports": {
+					"three": "../../three/build/three.module.js",
+					"three/addons/": "./jsm/"
+				}
+			}
+		</script>
+        <script type="module">
+            import * as THREE from 'three';
+            import { CSS3DRenderer, CSS3DObject } from '../../three/examples/jsm/renderers/CSS3DRenderer.js';
+            import { TrackballControls } from '../../three/examples/jsm/controls/TrackballControls.js';
+
+
+            const scene = new THREE.Scene();
+
+            const camera = new THREE.PerspectiveCamera(
+                75,                                     // Frame of view
+                window.innerWidth / window.innerHeight, // Aspect ratio
+                0.1,                                    // Near clipping plane
+                5000                                    // Far clipping plane
+            );
+
+            // Create renderers
+            const renderer = new THREE.WebGLRenderer();
+            const labelRenderer3D = new CSS3DRenderer();
+
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            labelRenderer3D.setSize( window.innerWidth, window.innerHeight );
+            labelRenderer3D.domElement.style.position = 'absolute';
+            labelRenderer3D.domElement.style.top = '0';
+
+            // Add the drawn scene to the browser window
+            document.body.appendChild( renderer.domElement );
+			document.getElementById( 'container' ).appendChild( labelRenderer3D.domElement );
+ 
+            // Create globe
+            const geometry = new THREE.SphereGeometry( 100, 100, 100);
+            const wireframe = new THREE.WireframeGeometry( geometry ); 
+            const globe = new THREE.LineSegments( wireframe ); 
+            globe.material.depthTest = false; 
+            globe.material.opacity = 0.25; 
+            globe.material.transparent = true; 
+            scene.add( globe );
+            globe.scale.set(5.7,5.7,5.7)
+
+            ////////////////////////////////////////////////////////////////
+            // Create Labels
+            const labelDiv = document.createElement('a');
+            labelDiv.className = 'label';
+            labelDiv.textContent = 'Agora Road';
+            labelDiv.href = 'https://agoraroad.com/';
+            labelDiv.target = '_blank';
+            labelDiv.style.cursor = 'pointer';
+            labelDiv.style.textDecoration = 'underline';
+            labelDiv.style.color = 'blue';
+            labelDiv.style.fontSize = '20px';
+            labelDiv.style.transformOrigin = 'center'; // Keep scaling centered
+
+            const label = new CSS3DObject(labelDiv);
+            label.position.set(100, 50, 30);
+            label.rotation.y = 240;
+            globe.add(label);
+
+            //
+
+            const labelDiv1 = document.createElement('a');
+            labelDiv1.className = 'label';
+            labelDiv1.textContent = 'Lain Chan';
+            labelDiv1.href = 'https://www.lainchan.org/';
+            labelDiv1.target = '_blank';
+            labelDiv1.style.cursor = 'pointer';
+            labelDiv1.style.textDecoration = 'underline';
+            labelDiv1.style.color = 'blue';
+            labelDiv1.style.fontSize = '20px';
+            labelDiv1.style.transformOrigin = 'center'; // Keep scaling centered
+
+            const label1 = new CSS3DObject(labelDiv1);
+            label1.position.set(-100, 50, 30);
+            label1.rotation.y = -70.5;
+            globe.add(label1);
+
+            //
+
+            const labelDiv2 = document.createElement('a');
+            labelDiv2.className = 'label';
+            labelDiv2.textContent = 'YouTube';
+            labelDiv2.href = 'https://www.youtube.com/';
+            labelDiv2.target = '_blank';
+            labelDiv2.style.cursor = 'pointer';
+            labelDiv2.style.textDecoration = 'underline';
+            labelDiv2.style.color = 'blue';
+            labelDiv2.style.fontSize = '20px';
+            labelDiv2.style.transformOrigin = 'center'; // Keep scaling centered
+
+            const label2 = new CSS3DObject(labelDiv2);
+            label2.position.set(-80, 90, -30);
+            label2.rotation.y = 4.5;
+            globe.add(label2);
+
+            //
+
+            const labelDiv3 = document.createElement('a');
+            labelDiv3.className = 'label';
+            labelDiv3.textContent = 'Internet Archive';
+            labelDiv3.href = 'https://archive.org/';
+            labelDiv3.target = '_blank';
+            labelDiv3.style.cursor = 'pointer';
+            labelDiv3.style.textDecoration = 'underline';
+            labelDiv3.style.color = 'blue';
+            labelDiv3.style.fontSize = '20px';
+            labelDiv3.style.transformOrigin = 'center'; // Keep scaling centered
+
+            const label3 = new CSS3DObject(labelDiv3);
+            label3.position.set(100, -70, 30);
+            label3.rotation.y = -5;
+            globe.add(label3);
+
+            //
+
+            const labelDiv4 = document.createElement('a');
+            labelDiv4.className = 'label';
+            labelDiv4.textContent = 'Reddit';
+            labelDiv4.href = 'reddit.com/';
+            labelDiv4.target = '_blank';
+            labelDiv4.style.cursor = 'pointer';
+            labelDiv4.style.textDecoration = 'underline';
+            labelDiv4.style.color = 'blue';
+            labelDiv4.style.fontSize = '20px';
+            labelDiv4.style.transformOrigin = 'center'; // Keep scaling centered
+
+            const label4 = new CSS3DObject(labelDiv4);
+            label4.position.set(100, -100, -15);
+            label4.rotation.y = 8;
+            globe.add(label4);
+        
+
+            ////////////////////////////////////////////////////////////////
+            // Lights
+            const ambientLight = new THREE.AmbientLight( 0x191919, 1 );
+            scene.add( ambientLight );
+            // Create the DirectionalLight
+            const directionalLight = new THREE.DirectionalLight( 0xffffff, 1);
+            // Adjust the position of directionalLight
+            directionalLight.position.set( 0, 1, 3 );
+            scene.add( directionalLight );
+
+            // Back up the camera so the cube is within the camera's view
+            camera.position.z = 1000;
+            // Redraw the scene on the browser window to see the 3D cube
+            renderer.render( scene, camera );
+
+
+            ////////////////////////////////////////////////////////////////
+            let controls;
+            controls = new TrackballControls( camera, labelRenderer3D.domElement ); //2nd param must be the top ovberlayed element
+			controls.minDistance = 500;
+			controls.maxDistance = 6000;
+            controls.rotateSpeed = 1.0;
+            controls.zoomSpeed = 1.2;
+            controls.panSpeed = 0.8;
+            controls.staticMoving = true;
+            controls.dynamicDampingFactor = 0.3;
+            
+
+
+            ////////////////////////////////////////////////////////////////
+            //functions
+            function onWindowResize() {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                labelRenderer3D.setSize(window.innerWidth, window.innerHeight);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                render()
+            }
+
+            window.addEventListener('resize', onWindowResize, false);
+
+
+
+            const animate = function () {
+                // Set up the recurring call that powers the animation loop
+                requestAnimationFrame( animate );
+
+                // Change the rotation of the cube for one frame of animation
+                globe.rotation.y += 0.003;
+
+                controls.update();
+                render()
+            };
+
+
+            function render() {
+                renderer.render(scene, camera);
+                labelRenderer3D.render(scene, camera);
+            }
+            controls.addEventListener( 'change', render );
+
+
+        ////////////////////////////////////////////////////////////////
+        // Run world
+            animate();
+            onWindowResize();
+        </script>
+    </body>

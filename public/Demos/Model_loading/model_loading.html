@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Catgirl!</title>
+        <link rel="icon" href="../../images/ico.png" type="image/png">
+		<style>
+			body { 
+                display: flex; 
+                justify-content: center;
+            }
+            
+            .first { 
+                z-index: 10; 
+                position: absolute;
+                text-align: center;
+            }
+            .first h1, a, p { color: white; }
+            canvas {    top: 0; left: 0; height: 100vh; width: 100vw; position: absolute; z-index: 0;}
+            .label {
+                color: white;
+                font-size: 16px;
+                background-color: rgba(0, 0, 0, 0.7); /* Add a background for visibility */
+                padding: 4px;
+                border-radius: 4px;
+            }
+		</style>
+	</head>s
+	<body>
+		<script type="importmap">
+            {
+                "imports": {
+                    "three": "../../three/build/three.module.js",
+                    "three/addons/": "./jsm/"
+                }
+            }
+        </script>
+		<script type="module">
+            import * as THREE from 'three';
+            import { GLTFLoader } from '../../three/examples/jsm/loaders/GLTFLoader.js';
+            import { CSS2DRenderer, CSS2DObject } from '../../three/examples/jsm/renderers/CSS2DRenderer.js';
+            import { PointerLockControls } from '../../three/examples/jsm/controls/PointerLockControls.js';
+
+            let model;
+            let mixer, clock;
+            let isModelLoaded = false;
+            window.model = model;
+
+
+            clock = new THREE.Clock();
+            // Create the scene to hold the 3D objects
+            const scene = new THREE.Scene();
+
+            // Create the camera to view the 3D objects
+            const camera = new THREE.PerspectiveCamera(
+                60,                                     // Frame of view
+                window.innerWidth / window.innerHeight, // Aspect ratio
+                0.1,                                    // Near clipping plane
+                1000                                    // Far clipping plane
+            );
+            camera.position.z = 9;
+
+            const move = { forward: false, backward: false, left: false, right: false };
+            const rotate = { left: false, right: false};
+            const speed = 0.1;
+            const controls = new PointerLockControls(camera, document.body);
+
+            // Create the renderer to draw the 3D objects in the browser.
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize( window.innerWidth, window.innerHeight );
+
+            // Create CSS2D label renderer
+            const labelRenderer = new CSS2DRenderer();
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.domElement.style.position = 'absolute';
+            labelRenderer.domElement.style.top = '0';
+            document.body.appendChild(labelRenderer.domElement);
+
+
+            // Add the drawn scene to the browser window
+            document.body.appendChild( renderer.domElement );
+
+
+            const loader = new GLTFLoader(); 
+
+            // Create a clickable box
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+            const cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+            cube.scale.set(1, 1, 1);
+            cube.position.set(7, 0, 0);
+            
+
+            // Create a CSS2D label
+            const labelDiv = document.createElement('a');
+            labelDiv.className = 'label';
+            labelDiv.textContent = 'Click Me or the Cube!';
+            labelDiv.href = 'https://agoraroad.com/';
+            labelDiv.target = '_blank';
+            labelDiv.style.cursor = 'pointer';
+            labelDiv.style.textDecoration = 'underline';
+            labelDiv.style.color = 'blue';
+            const label = new CSS2DObject(labelDiv);
+            label.position.set(1, 0, 0);
+            cube.add(label);
+
+            // add raycaster and pointer tracking
+            const raycaster = new THREE.Raycaster();
+            const pointer = new THREE.Vector2();
+
+            // Create the AmbientLight
+            const ambientLight = new THREE.AmbientLight( 0xA11360, 1);
+            scene.add( ambientLight );
+
+            // Create the DirectionalLight
+            const directionalLight = new THREE.DirectionalLight( 0xffffff, 1);
+            // Adjust the position of directionalLight
+            directionalLight.position.set( 0, 1, 3 );
+            scene.add( directionalLight );
+
+            // Change the background color of the scene
+            scene.background = new THREE.Color( 0x000000 );
+            renderer.render( scene, camera );
+
+
+
+            document.addEventListener('keydown', (event) => {
+                switch (event.code) {
+                    case 'KeyW':
+                        move.forward = true;
+                        break;
+                    case 'KeyS':
+                        move.backward = true;
+                        break;
+                    case 'KeyA':
+                        move.left = true;
+                        break;
+                    case 'KeyD':
+                        move.right = true;
+                        break;
+                    case 'KeyQ':
+                        rotate.left = true;
+                        break;
+                    case 'KeyE':
+                        rotate.right = true;
+                        break;
+                }
+            });
+
+            document.addEventListener('keyup', (event) => {
+                switch (event.code) {
+                    case 'KeyW':
+                        move.forward = false;
+                        break;
+                    case 'KeyS':
+                        move.backward = false;
+                        break;
+                    case 'KeyA':
+                        move.left = false;
+                        break;
+                    case 'KeyD':
+                        move.right = false;
+                        break;
+                    case 'KeyQ':
+                        rotate.left = false;
+                        break;
+                    case 'KeyE':
+                        rotate.right = false;
+                        break;
+                }
+            });
+
+
+
+
+
+
+
+
+
+
+
+            function onWindowResize() {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+            }
+
+            window.addEventListener('resize', onWindowResize, false);
+
+
+
+
+
+
+
+            function onPointerMove(event) {
+                pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+                pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            }
+
+
+
+
+
+
+
+            function onClick(event) {
+                raycaster.setFromCamera(pointer, camera);
+                const intersects = raycaster.intersectObjects(scene.children, true);
+                if (intersects.length > 0) {
+                    const object = intersects[0].object;
+                    if (object === cube) {
+                    window.open('https://www.youtube.com/', '_blank'); // Redirect to your link
+                    }
+                }
+            }
+
+            window.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('click', onClick);
+
+
+
+
+
+
+            // function must be attached to the window in order to be called by a button
+            window.loadModel = function (url) {
+                if (!isModelLoaded) {
+                    loader.load( 
+                        url,
+                        function ( gltf ) { 
+                            model = gltf.scene;
+                            scene.add( model ); 
+                            gltf.scene.position.set(0, -5, 0);
+                            gltf.scene.scale.set(1,1,1);
+                            gltf.scene.rotation.y = 45;
+
+                        }, 
+                        undefined, 
+                        function ( error ) { 
+                            console.error( 'An error happened', error ); 
+                        } 
+                    );
+                    isModelLoaded = true;
+                }
+            }
+
+
+
+
+
+
+            // function must be attached to the window in order to be called by a button
+            window.loadModelWithAnimation = function (url) {
+                if (!isModelLoaded) {
+                    loader.load( 
+                        url,
+                        function ( gltf ) { 
+                            model = gltf.scene;
+                            scene.add( model ); 
+                            gltf.scene.position.set(0, -5, 0);
+                            gltf.scene.scale.set(0.4,0.4,0.4);
+                            gltf.scene.rotation.y = 45;
+                            mixer = new THREE.AnimationMixer( model );
+                            mixer.clipAction( gltf.animations[ 0 ] ).play();
+				            renderer.setAnimationLoop( animate );
+                        }, 
+                        undefined, 
+                        function ( error ) { 
+                            console.error( 'An error happened', error ); 
+                        } 
+                    );
+                    isModelLoaded = true;
+                }
+            }
+
+
+
+
+
+
+            window.deleteModel = function(model) {
+                var meshArray = scene.children;
+                var lastMeshAdded = meshArray[meshArray.length - 1];
+                if (isModelLoaded) { 
+                    scene.remove( lastMeshAdded ); 
+                    isModelLoaded = false;
+                }
+            }
+
+
+
+            window.printScene = function() {
+                console.log( scene );
+                console.log( isModelLoaded );
+            }
+
+
+
+            function animate() {
+                // renderer.setAnimationLoop( animate ); from the load function makes below line redundant
+                //requestAnimationFrame(animate);
+                
+                let mixerUpdateDelta = clock.getDelta();
+
+                renderer.render(scene, camera);
+                labelRenderer.render(scene, camera);
+                if (model) {
+                    model.rotation.y += 0.01; // Rotate the model
+                }
+
+                if (move.forward) controls.moveForward(speed);
+                if (move.backward) controls.moveForward(-speed);
+
+                if (move.left) controls.moveRight(-speed);
+                if (move.right) controls.moveRight(speed);
+
+                if (rotate.left)  camera.rotation.y += speed;
+                if (rotate.right)  camera.rotation.y -= speed;
+
+                if (mixer) {
+                    mixer.update(mixerUpdateDelta);
+                }
+                
+
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+                
+            }
+
+            animate();
+
+
+            //RESOURCES
+
+            //Having trouble with the the MIME types
+            //https://forum.freecodecamp.org/t/visual-studio-code-live-server-for-an-html-file-with-imported-modules/488387
+
+            //Are js modules not allowed in vscode live server?  --> live server doesn't serve js modules correctly
+            //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
+
+            //https://stackoverflow.com/questions/73813721/syntaxerror-ambiguous-indirect-export-default-error-when-importing-my-own-clas
+            //https://stackoverflow.com/questions/64409605/how-do-i-load-gltfloader-from-a-cdn-three-js
+		</script>
+        <div class="first">
+            <h1>Model loading</h1>
+            <p>WASD to move, QE to rotate</p>
+            <button onclick="loadModel('models/scene.gltf')">Catgirl</button>
+            <button onclick="loadModel('models/soldier.gltf')">Soldier</button>
+            <button onclick="loadModelWithAnimation('models/soldier_run.gltf')">Running Soldier</button>
+            <button onclick="deleteModel(model)">Delete Model</button>
+            <button onclick="printScene()">Print scene (Debugging only)</button>
+            <p>For some reason you must load the running soldier first. Anything else and the program breaks...</p>
+        </div>
+	</body>
+</html>

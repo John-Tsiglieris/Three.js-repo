@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Globe Links</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="icon" href="./images/ico.png" type="image/png">
+        <title>Title</title>
+        <style>
+			body { margin: 0; }
+            .label {
+                color: white;
+                font-size: 16px;
+                background-color: rgba(0, 0, 0, 0.7); /* Add a background for visibility */
+                padding: 4px;
+                border-radius: 4px;
+            }
+            /* Container for canvas and overlays */
+            #canvas-container {
+                position: relative;
+                width: 100vw;
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            /* Canvas setup */
+            #canvas {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                display: block;
+            }
+
+            /* Common style for overlay divs */
+            .clickable {
+                position: absolute;          
+                display: flex;
+                justify-content: space-between;
+                background-color: transparent;
+                cursor: pointer; /* Indicates clickability */
+                z-index: 1000;
+            }
+
+            /* Specific positioning for each overlay */
+            #top {
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 20%; /* Adjust as needed */
+            }
+
+            #bottom {
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 20%; /* Adjust as needed */
+            }
+
+            #left {
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: 20%; /* Adjust as needed */
+            }
+
+            #right {
+                top: 0;
+                bottom: 0;
+                right: 0;
+                width: 20%; /* Adjust as needed */
+            }
+
+		</style>
+    </head>
+    <body>
+        <div class="label" id="cam_pos">: </div>
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+            <div class="clickable" id="top"></div>
+            <div class="clickable" id="bottom"></div>
+            <div class="clickable" id="left"></div>
+            <div class="clickable" id="right"></div>
+        </div>
+        <script type="importmap">
+			{
+				"imports": {
+					"three": "../three/build/three.module.js",
+					"three/addons/": "./jsm/"
+				}
+			}
+		</script>
+        <script type = "module">
+            import * as THREE from 'three';
+            //import { GUI } from '../three/examples/jsm/libs/lil-gui.module.min.js';
+            import { CSS3DRenderer, CSS3DObject } from '../three/examples/jsm/renderers/CSS3DRenderer.js';
+            //import { TrackballControls } from '../three/examples/jsm/controls/TrackballControls.js';
+            //import { OrbitControls } from '../three/examples/jsm/controls/OrbitControls.js';
+            import { GLTFLoader } from '../three/examples/jsm/loaders/GLTFLoader.js';
+			import { CSS2DRenderer, CSS2DObject } from '../three/examples/jsm/renderers/CSS2DRenderer.js';
+            import { PointerLockControls } from '../three/examples/jsm/controls/PointerLockControls.js';
+
+            
+            const scene = new THREE.Scene();
+
+            const camera = new THREE.PerspectiveCamera(
+                75,                                     // Frame of view
+                window.innerWidth / window.innerHeight, // Aspect ratio
+                0.1,                                    // Near clipping plane
+                1000                                    // Far clipping plane
+            );
+
+            const cam_positions = [ [[5.53, 14.70, 7.71], [-0.29, 0.08, 0.02]], 
+                             [[7.56, 14.70, -2.13],[-2.83, -0.41, -3.01]], 
+                             [[7.35, 14.70, -1.91],[-2.48, 1.18, 2.51]], 
+                             [[1.31,13.70,-0.63], [-0.07, 1.02, 0.06]], 
+                             [[-0.41, 14.00, -6.07],[-2.97, -0.44, -3.07]], 
+                             [[-4.24, 14.00, -10.48], [-3.05, 0.46, 3.10]], 
+                             [[-9.13, 14.00, -5.21], [-2.90, -1.02, -2.94]], 
+                             [[-8.78, 14.00, -5.80], [-0.25, 1.03, 0.21]],
+                              [[-13.28, 14.00, -7.00], [-2.42, 1.12, 2.48]], 
+                            ];
+
+            // Create the renderer to draw the 3D objects in the browser.
+            const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas') });
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            scene.background = new THREE.Color( 0x99ccff );
+
+            // Add the drawn scene to the browser window
+            document.getElementById('canvas-container').appendChild( renderer.domElement );
+
+            let labelRenderer = new CSS2DRenderer();
+            labelRenderer.setSize( window.innerWidth, window.innerHeight );
+            labelRenderer.domElement.style.position = 'absolute';
+            labelRenderer.domElement.style.top = '0px';
+            document.body.appendChild( labelRenderer.domElement );
+
+            const loader = new GLTFLoader(); 
+            const controls = new PointerLockControls(camera, document.body);
+
+            document.addEventListener('click', () => {
+                controls.lock();
+            });
+
+            const move = { forward: false, backward: false, left: false, right: false };
+            const speed = 0.1;
+
+            /*
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+            const cube = new THREE.Mesh( geometry, material );
+            scene.add( cube );
+            */
+
+            let model;
+            loader.load( 
+                'Model_Loading/models/Seans_house.glb',
+                function ( gltf ) { 
+                    model = gltf.scene;
+                    scene.add( model ); 
+                    gltf.scene.position.set(0, -5, 0);
+                    gltf.scene.scale.set(1,1,1);
+                    gltf.scene.rotation.y = 45;
+
+                }, 
+                undefined, 
+                function ( error ) { 
+                    console.error( 'An error happened', error ); 
+                } 
+            );
+
+            camera.position.z = 2;
+
+            renderer.render( scene, camera );
+
+
+
+
+
+            ////////////////////////////////////////////////////////////////////////////////
+            // Lights
+            const ambientLight = new THREE.AmbientLight( 0xffffcc, 1);
+            scene.add( ambientLight );
+
+            const directionalLight = new THREE.DirectionalLight( 0xffffff, 1);
+            directionalLight.position.set( 0, 1, 3 );
+            scene.add( directionalLight );
+
+
+
+
+
+
+
+
+            document.addEventListener('keydown', (event) => {
+                switch (event.code) {
+                    case 'KeyW':
+                        move.forward = true;
+                        break;
+                    case 'KeyS':
+                        move.backward = true;
+                        break;
+                    case 'KeyA':
+                        move.left = true;
+                        break;
+                    case 'KeyD':
+                        move.right = true;
+                        break;
+                    case 'KeyQ':
+                        move.up = true;
+                        break;
+                    case 'KeyE':
+                        move.down = true;
+                        break;
+                }
+            });
+
+            document.addEventListener('keyup', (event) => {
+                switch (event.code) {
+                    case 'KeyW':
+                        move.forward = false;
+                        break;
+                    case 'KeyS':
+                        move.backward = false;
+                        break;
+                    case 'KeyA':
+                        move.left = false;
+                        break;
+                    case 'KeyD':
+                        move.right = false;
+                        break;
+                    case 'KeyQ':
+                        move.up = false;
+                        break;
+                    case 'KeyE':
+                        move.down = false;
+                        break;
+                }
+            });
+
+
+
+
+
+
+            function resizeRendererToDisplaySize() {
+                const canvas = renderer.domElement;
+                const width = canvas.clientWidth;
+                const height = canvas.clientHeight;
+                const needResize = canvas.width !== width || canvas.height !== height;
+
+                if (needResize) {
+                    renderer.setSize(width, height, false); // Don't scale canvas CSS
+                }
+                return needResize;
+            }
+
+
+
+
+
+
+            const animate = function () {
+                requestAnimationFrame( animate );
+
+                
+                if (resizeRendererToDisplaySize()) {
+                    const canvas = renderer.domElement;
+                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                    camera.updateProjectionMatrix();
+                }
+                
+
+
+                if (move.forward) controls.moveForward(speed);
+                if (move.backward) controls.moveForward(-speed);
+
+                if (move.left) controls.moveRight(-speed);
+                if (move.right) controls.moveRight(speed);
+
+                if (move.up)  camera.position.y += speed;
+                if (move.down)  camera.position.y -= speed;
+
+                cam_pos.textContent = `( ${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)}),
+                (${camera.rotation.x.toFixed(2)}, ${camera.rotation.y.toFixed(2)}, ${camera.rotation.z.toFixed(2)})`;
+
+                renderer.render( scene, camera );
+            }
+
+            animate();
+        </script>
+    </body>
